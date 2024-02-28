@@ -1,0 +1,230 @@
+#---1---
+
+#Create a script that asks values from the user until user decides to end the script.
+#Given values are added to the end of file called animal.txt
+#Finally script prints every value from the file.
+
+
+HELPER=0
+
+while [ ${HELPER} -eq 0 ]
+do
+  read -p "Give a new animal: " ANIMAL
+  if [ ${ANIMAL} = exit ]
+  then
+    echo "exiting program..."
+    break
+  else
+    echo ${ANIMAL} >> ${HOME}/animals.txt
+  fi
+done
+
+
+#--------------------------------------------------
+
+#---2---
+
+#Create a script that reads cars.csv file.
+#File that is read must be given at the script startup as a command line argument.
+#Script reads information from the file and prints the values to the user.
+
+
+HELPER=0
+
+while IFS=',' read -r man model year color
+do
+  if [ ${HELPER} -eq 0 ]
+  then
+    ((HELPER++))
+  else
+    echo -e "\n manufacturer ${man}"
+    echo "model: ${model}"
+    echo "color: ${color}"
+    echo "year: ${year}"
+  fi
+done < cars.csv
+
+#OR
+
+while read line
+do
+  IFS=,
+  printf "\nmanufacturer: %s\nmodel: %s\ncolor: %s\nyear: %s" ${line[0]} ${line[1]} ${line[3]} ${line[2]}
+done < cars.csv
+
+
+#--------------------------------------------------
+
+#---3---
+
+#Modify the task 2.
+#Script should have function that adds a new entry to the cars.csv file based on the user input.
+#Every value must be asked from the user separately and value/values added should be given to the function as an argument.
+
+FILE="${HOME}/cars.csv"
+
+function write_car() {
+echo $1 >> ${FILE}
+}
+
+function add_car() {
+echo -e "Welcome to add a new car!"
+CAR=$(read -p "Manufacturer: " MAN ; echo ${MAN},)
+CAR+=$(read -p "Model: " MOD ; echo ${MOD},)
+CAR+=$(read -p "Year: " YEAR ; echo ${YEAR},)
+CAR+=$(read -p "Color: " COLOR ; echo ${COLOR})
+echo ${CAR}
+}
+
+function list_cars() {
+HELPER=0
+
+while IFS=',' read -r man model year color
+do
+  if [ ${HELPER} -eq 0 ]
+  then
+    ((HELPER++))
+  else
+    echo -e "\n---CAR ${HELPER}---"
+    echo -e "manufacturer: ${man}"
+    echo "model: ${model}"
+    echo "color: ${color}"
+    echo "year: ${year}"
+    ((HELPER++))
+  fi
+done < ${FILE}
+}
+
+
+function main() {
+OPT="list add exit"
+select x in ${OPT}
+do
+  case ${x} in
+    list)
+      list_cars
+      ;;
+    add)
+      add_car
+      write_car ${CAR}
+      echo "Car added succesfully!"
+      ;;
+    exit)
+      echo "Exiting..."
+      break
+      ;;
+    *)
+      echo "Unknown selection..."
+      ;;
+  esac
+done
+}
+
+
+main
+
+
+
+#--------------------------------------------------
+
+#---4---
+
+#Create a script that have a function that changes services listening ports (80 x2) and default page (index.html) defined in example.conf.
+#New values are given as command line arguments during the script startup. Only one port is given and it's used for both fields.
+#NOTE: Script should overwrite the default values, not every possible value in that spot (think that those are values after the apt install command)
+
+change_values() {
+
+sed -r -i "s/80/${1}/g" example.conf
+sed -r -i "s/index.html/${2}/" example.conf
+
+}
+
+change_values  ${1} ${2}
+
+
+# example without default values
+
+#file="${1}"
+#ip="${2}"
+#
+#sed -r -i "s/(^ *listen *)[0-9]+ /\1$ip /" example.conf
+#sed -r -i "s/(^ *listen *[[][0-9a-z:]+[]]:)[0-9]+ /\1$ip /" example.conf
+#sed -r -i "s/(^ *index *).*;/\1$file;/" example.conf
+
+
+#--------------------------------------------------
+
+#---5---
+
+#Create a script that reads superhero.json file.
+#Script prints hero names to the user who selects which heroes powers or secret identity he/she wants to see.
+#Script prints the desired values to the user.
+#Script will continue asking what to do until user gives some string to exit to script (exit perhaps?)
+
+
+FILE="superhero.json"
+
+function list_heroes() {
+local COUNT=$(jq '.members | length' superhero.json)
+
+for x in $(seq 0 $(( ${COUNT}-1 )) )
+do
+  echo -e "\nSuperhero ${x}:\n$(jq ".members[${x}].name" ${FILE})\n"
+done
+
+}
+
+function get_name() {
+echo -e "\nSuperhero:\n$(jq ".members[${1}].name" ${FILE})\n"
+}
+
+function get_identity() {
+echo -e "Secret Identity:\n$(jq ".members[${1}].secretIdentity" $FILE)\n"
+}
+
+function get_superpowers() {
+echo -e "Superpowers:\n$(jq ".members[${1}].powers[]" ${FILE})\n"
+}
+
+
+OPT="list show exit"
+while [ True ]
+do
+  echo -e "\n---WELCOME TO THE SUPERHERO PROGRAM!---"
+  read -p "Input operation (list, show or exit):" OPER
+  if [ ${OPER} = exit ]
+  then
+    break
+  else
+    case ${OPER} in
+      list)
+        list_heroes
+        ;;
+      show)
+        SELECTION="identity powers"
+        read -p "which hero details (input a number): " HERO
+        read -p "identity or powers: " SELECTION
+        case ${SELECTION} in
+          identity)
+              get_name ${HERO}
+              get_identity ${HERO}
+              ;;
+          powers)
+              get_name ${HERO}
+              get_superpowers ${HERO}
+              ;;
+          *)
+            echo "unknow selection, try again!"
+            ;;
+        esac
+        ;;
+      *)
+        echo "Operation unknown!"
+        ;;
+    esac
+  fi
+done
+
+
+#--------------------------------------------------

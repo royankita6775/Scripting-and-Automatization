@@ -1,0 +1,158 @@
+#--------------------------------------------------------------
+
+#---1---
+
+#Create a script that asks URL from the user and a function that tries to ping it with a 1 package.
+#If ping is successfull, return a exit code 0.
+#If not, return a exit code 1.
+#Based on the exit code that the function returned, print outcome to user.
+
+
+function pingpong() {
+
+ping -c 1 ${1} &>> /dev/null
+
+if [ ${?} -eq 0 ]
+then
+  return 0
+else
+  return 1
+fi
+}
+
+
+read -p "Give URL which you want to ping: " url
+pingpong ${url}
+
+if [ ${?} -eq 0 ]
+then
+  echo "Succeeded to ping URL: ${url}"
+else
+  echo "Failed to ping URL: ${url}"
+fi
+
+
+#--------------------------------------------------------------
+
+#---2---
+
+#Create a script that prints 3 random numbers on the terminal and also generates a syslog message with a correlating number for each random number.
+#Log message priority should be user.info.
+#Hints: Special variable $RANDOM
+
+
+function generate-syslog() {
+logger -p user.info "The random number is: ${1}"
+}
+
+count=0
+while [ ${count} -le 2 ]
+do
+  RANDNUM=$RANDOM
+  echo ${RANDNUM}
+  generate-syslog ${RANDNUM}
+  ((count++))
+done
+
+
+#--------------------------------------------------------------
+
+#---3---
+
+#Create a script that installs the program using apt, based on the user input. (cowsay etc.)
+#If the installation is successfull, tell that to the user and exit normally.
+#If not, inform user and exit with a code 111.
+#Hints: sudo permissions and apt options
+
+
+function program-apt(){
+apt --yes install ${1} &>> /dev/null
+
+if [ ${?} -eq 0 ]
+then
+  echo "${1}: Installation successfull"
+else
+  echo "${1}: Installation failed!"
+  exit 111
+fi
+}
+
+
+read -p "Which program do you want to install? " package
+
+program-apt ${package}
+
+
+#--------------------------------------------------------------
+
+#---4---
+
+#Create a script that has a function called network_information that shows the following information:
+#ip address: 
+#hostname: 
+#
+#Log the messages in the syslog with a custom tag "network-information".
+#Hints: Utilize arrays and ip or hostname commands with options
+
+
+network_information () {
+local ip=( $(hostname -I) ) #example how to save the array, no need for this if it return only 1 value
+local host=$(hostname)
+echo -e "ipaddress: ${ip[0]} \nhostname: ${host}"
+logger -t "network-information" "IP: ${ip}  Hostname: ${host}"
+}
+
+network_information
+
+
+#--------------------------------------------------------------
+
+#---5---
+
+#Create a script that has 3 functions: mk_folder, download_image and change_perm.
+#mk_folder function asks a new folder path from the user and creates the folder.
+#download_image function downloads the following image to the previously created directory and renames it as a linux-tux.png: image
+#change_perm function sets the folder and image permissions in a way that only owner has rights to them (rwx).
+#Every possible variable substitution and command execution must be shown in the terminal during the execution
+
+#!/bin/bash -x
+
+mk_folder () {
+read -p "Please give a folder path and name: " folder
+mkdir ${folder}
+
+#if [ ${?} -ne 0 ]
+#then
+#  echo "Cannot create: ${folder}"
+#  exit 1
+#fi
+}
+
+download_image () {
+wget -o ${1}/linux-tux.png https://student.labranet.jamk.fi/~pekkju/script/tux.png
+
+#mv $1/tux.png $1/linux-tux.png
+#if [ ${?} -ne 0 ]
+#then
+#  echo "Cannot download image"
+#  exit 1
+#fi
+}
+
+change_perm () {
+chmod -R 700 ${1}
+
+#if [ ${?} -ne 0 ]
+#then
+#  echo "Cannot change ${1} permissions"
+#  exit 1
+#fi
+}
+
+#---the main program---
+mk_folder
+download_image ${folder}
+change_perm ${folder}
+
+
+#--------------------------------------------------------------

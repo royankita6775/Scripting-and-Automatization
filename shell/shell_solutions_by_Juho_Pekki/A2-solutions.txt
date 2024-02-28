@@ -1,0 +1,123 @@
+#--------------------------------------------------------------
+
+#---1---
+
+#Create a script that asks a file to remove from the user.
+#File is removed if it's a regular file and it's empty, otherwise some kind of error message is printed.
+
+
+read -p "What file you want to remove: " file
+
+if [ -f ${file} ]
+then
+  echo "${file} EXISTS"
+  if [ -s ${file} ]
+  then
+    echo "${file} is not empty!"
+  else
+    rm ${file}
+    echo "Succesfully removed ${file}"
+  fi
+else
+  echo "${file} does not exist!"
+fi
+
+
+#--------------------------------------------------------------
+
+#---2---
+
+#Write a shell script that checks if the file /etc/hosts exists.
+#If the file exists, script prints the outcome: /etc/hosts available.
+#Also check can you write in the file.
+#Script prints the outcome: You have permission to edit the file OR you dont have permission to edit the file
+
+file="/etc/hosts"
+
+if [ -e ${file} ]
+then 
+  echo "${file} exists!"
+  if [ -w ${file} ]
+  then
+    echo "You have permission to edit ${file}."
+  else
+    echo "You don't have permission to edit ${file}"
+  fi
+else
+  then
+  echo "${file} does not exist!"
+fi
+
+
+#--------------------------------------------------------------
+
+#---3---
+
+#Create a script that returns a type of objects given (file or directory or something else).
+#User can give unlimited number of paths using the commandline arguments.
+#Every object type is printed on the own line.
+
+
+for x in ${@}
+do
+  if [ -d ${x} ]
+    then
+        echo "${x} is a directory!"
+  elif [ -f ${x} ]
+    then
+        echo "${x} is a regular file!"
+  else
+      echo "${x} type is unknown!"
+  fi
+done 
+
+
+#--------------------------------------------------------------
+
+#---4---
+
+#Create a script to automate user creation. NOTE: no password setup!
+#Script asks username from the user and before the user is created, script must check if the user with that name exists.
+#Use the following syntax in you conditional statement: id -u USERNAME. If the command returns "no such user", thats equal to false!
+#New user must have home directory under the /home/ directory and default shell as bash.
+
+
+read -p "Give username: " username
+
+if id -u ${username} #Note: no test brackets ([xyz])
+then
+	echo "${username} already exists!"
+else
+	useradd --create-home --shell /bin/bash ${username}
+fi
+
+#Remember to execute the script with sudo: sudo ./script.sh
+
+
+#--------------------------------------------------------------
+
+#---5---
+
+#Create a script that mimics a simple calculator.
+#At first, script asks the operation from the user (-, +, *, / ). After the user selects operation, two values are asked and the outcome is printed to the user.
+#Script execution stops when the user selects "exit" operation.
+
+set -f #note this line, disable file globbing, so you can use * sign
+
+opt="+ - * / exit"
+
+select x in $opt
+do
+  if [ ${x} = exit ]
+  then
+    break
+  else
+    read -p "Give 1st number: " num1
+    read -p "Give 2nd number: " num2
+    result=$(( ${num1}${x}${num2} ))
+	echo ${result}
+  fi
+done
+
+
+#--------------------------------------------------------------

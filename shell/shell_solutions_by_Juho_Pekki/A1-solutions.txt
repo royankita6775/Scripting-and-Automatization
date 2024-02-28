@@ -1,0 +1,78 @@
+#----------------------------------------------
+
+#---1---
+
+#Create a script that takes two command line arguments.
+#Script returns the following arithmetic solutions: addition, substraction, multiplication
+
+
+ADD=$(( ${1} + ${2} ))
+SUB=$(( ${1} - ${2} ))
+MULTI=$(( ${1} * ${2} ))
+
+echo "Sum = ${SUM}"
+echo "Sub = ${SUB}"
+echo "Multi = ${MULTI}"
+
+
+#----------------------------------------------
+
+#---2---
+
+#Create a script that creates a new file in user's home directory.
+#Script asks a new filename from the user and adds current date as an suffix to a filename (Y-M-D).
+
+
+read -p "Give a new filename: " FILE
+DATE=$(date +"%Y-%m-%d")
+touch $HOME/${FILE}-${DATE}
+echo "${FILE}-${DATE} was created!"
+
+
+#----------------------------------------------
+
+#---3---
+
+#Create a script that returns how many objects are in the given directory (do not include hidden files). Directory path is asked from the user.
+
+
+read -p "Give a folder path: " DIR
+COUNT=$(ls ${DIR} | wc -l)
+echo $COUNT
+
+#OR 
+
+read -p "Give a folder path: " DIR
+ls ${DIR} | wc -l 
+
+
+#----------------------------------------------
+
+#---4---
+
+#Create a script that copies the given file to a path provided by the user. So both paths should be asked from the user.
+#Finally script prints: "copied the "original file" to "given path"!"
+
+
+read -p "CP source location: " ORIG
+read -p "CP destination location: " DEST
+cp "${ORIG}" "${DEST}"
+echo "Copied " ${ORIG} to ${DEST}"
+#add -r option if you want that script works with folders as well
+
+
+#----------------------------------------------
+
+#---5---
+
+#Create a script that deletes the given files from the users home directory. 
+#Files are passed to the script using a command line arguments (3 values).
+#(Create a empty files in users home folder to test the functionality).
+#Finally script prints: i deleted the following files: x,y,z
+
+
+rm $HOME/${1} $HOME/${2} $HOME/${3}
+echo "Deleted following files ${1} ${2} ${3}"
+
+
+#----------------------------------------------
